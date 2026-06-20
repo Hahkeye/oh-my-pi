@@ -1,7 +1,7 @@
 import { $env } from "@oh-my-pi/pi-utils";
 
-const DEFAULT_STREAM_IDLE_TIMEOUT_MS = 120_000;
-const DEFAULT_STREAM_FIRST_EVENT_TIMEOUT_MS = 100_000;
+const DEFAULT_STREAM_IDLE_TIMEOUT_MS = 600_000;
+const DEFAULT_STREAM_FIRST_EVENT_TIMEOUT_MS = 600_000;
 /** Re-mint persistent race promises every N iterations (see hoisted-racer comment). */
 const RACER_REMINT_INTERVAL = 1024;
 
@@ -85,6 +85,20 @@ export function getOpenAIStreamFirstEventTimeoutMs(
 	if (base === undefined) return undefined;
 	if (idleTimeoutMs === undefined || idleTimeoutMs <= 0) return base;
 	return Math.max(base, idleTimeoutMs);
+}
+/** llama.cpp env vars take precedence so local servers can be tuned without touching global OpenAI defaults. */
+export function getLlamaCppStreamFirstEventTimeoutMs(idleTimeoutMs?: number): number | undefined {
+	return normalizeIdleTimeoutMs(
+		$env.PI_LLAMA_CPP_STREAM_FIRST_EVENT_TIMEOUT_MS ?? $env.PI_OPENAI_STREAM_FIRST_EVENT_TIMEOUT_MS,
+		getOpenAIStreamFirstEventTimeoutMs(idleTimeoutMs, 100_000),
+	);
+}
+
+export function getLlamaCppStreamIdleTimeoutMs(): number | undefined {
+	return normalizeIdleTimeoutMs(
+		$env.PI_LLAMA_CPP_STREAM_IDLE_TIMEOUT_MS ?? $env.PI_OPENAI_STREAM_IDLE_TIMEOUT_MS,
+		getOpenAIStreamIdleTimeoutMs(),
+	);
 }
 
 /**

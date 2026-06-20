@@ -2098,6 +2098,8 @@ export class AgentSession {
 					undefined,
 					{
 						thinkingLevel: advisorCompactionThinkingLevel,
+						streamFirstEventTimeoutMs: this.settings.get("compaction.timeoutMs"),
+						streamIdleTimeoutMs: this.settings.get("compaction.timeoutMs"),
 						convertToLlm: messages => this.#convertToLlmForSideRequest(messages),
 						telemetry,
 					},
@@ -9165,6 +9167,8 @@ export class AgentSession {
 					signal,
 					{
 						...options,
+						streamFirstEventTimeoutMs: this.settings.get("compaction.timeoutMs"),
+						streamIdleTimeoutMs: this.settings.get("compaction.timeoutMs"),
 						metadata: this.agent.metadataForProvider(candidate.provider),
 						convertToLlm: messages => this.#convertToLlmForSideRequest(messages),
 						telemetry,
@@ -9558,6 +9562,8 @@ export class AgentSession {
 								undefined,
 								autoCompactionSignal,
 								{
+									streamFirstEventTimeoutMs: this.settings.get("compaction.timeoutMs"),
+									streamIdleTimeoutMs: this.settings.get("compaction.timeoutMs"),
 									promptOverride: this.#obfuscateTextForProvider(compactionPrep.hookPrompt),
 									extraContext: this.#obfuscateForProvider(compactionPrep.hookContext),
 									remoteInstructions: this.#obfuscateForProvider(this.#baseSystemPrompt.join("\n\n")),

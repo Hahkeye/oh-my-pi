@@ -1147,6 +1147,60 @@ const SETTING_HOOKS: Partial<Record<SettingPath, SettingHook<any>>> = {
 			appendOnlyModeSignal.fire(value);
 		}
 	},
+	"provider.openaiStreamFirstEventTimeoutMs": value => {
+		if (typeof value === "number") {
+			if (value > 0) {
+				Bun.env.PI_OPENAI_STREAM_FIRST_EVENT_TIMEOUT_MS = String(value);
+			} else {
+				delete Bun.env.PI_OPENAI_STREAM_FIRST_EVENT_TIMEOUT_MS;
+			}
+		}
+	},
+	"provider.openaiStreamIdleTimeoutMs": value => {
+		if (typeof value === "number") {
+			if (value > 0) {
+				Bun.env.PI_OPENAI_STREAM_IDLE_TIMEOUT_MS = String(value);
+			} else {
+				delete Bun.env.PI_OPENAI_STREAM_IDLE_TIMEOUT_MS;
+			}
+		}
+	},
+	"provider.llamacppStreamFirstEventTimeoutMs": value => {
+		if (typeof value === "number") {
+			if (value > 0) {
+				Bun.env.PI_LLAMA_CPP_STREAM_FIRST_EVENT_TIMEOUT_MS = String(value);
+			} else {
+				delete Bun.env.PI_LLAMA_CPP_STREAM_FIRST_EVENT_TIMEOUT_MS;
+			}
+		}
+	},
+	"provider.llamacppStreamIdleTimeoutMs": value => {
+		if (typeof value === "number") {
+			if (value > 0) {
+				Bun.env.PI_LLAMA_CPP_STREAM_IDLE_TIMEOUT_MS = String(value);
+			} else {
+				delete Bun.env.PI_LLAMA_CPP_STREAM_IDLE_TIMEOUT_MS;
+			}
+		}
+	},
+	"provider.streamIdleTimeoutMs": value => {
+		if (typeof value === "number") {
+			if (value > 0) {
+				Bun.env.PI_STREAM_IDLE_TIMEOUT_MS = String(value);
+			} else {
+				delete Bun.env.PI_STREAM_IDLE_TIMEOUT_MS;
+			}
+		}
+	},
+	"provider.streamFirstEventTimeoutMs": value => {
+		if (typeof value === "number") {
+			if (value > 0) {
+				Bun.env.PI_STREAM_FIRST_EVENT_TIMEOUT_MS = String(value);
+			} else {
+				delete Bun.env.PI_STREAM_FIRST_EVENT_TIMEOUT_MS;
+			}
+		}
+	},
 	"hindsight.bankId": () => hindsightScopeSignal.fire(),
 	"hindsight.bankIdPrefix": () => hindsightScopeSignal.fire(),
 	"hindsight.scoping": () => hindsightScopeSignal.fire(),

@@ -1,4 +1,7 @@
 # @oh-my-pi/pi-coding-agent
+## Streaming Timeouts
+
+Global defaults for `Global Stream Idle Timeout` and `Global First-Event Timeout` are now 10 minutes (600,000 ms) so slow local models (llama.cpp, Ollama) don't get killed during compaction. Per-provider overrides are available under **Settings → Providers → Protocol** (`llama.cpp First-Event Timeout`, `llama.cpp Idle Timeout`, `OpenAI First-Event Timeout`, `OpenAI Idle Timeout`). Set any idle timeout to `0` to disable the watchdog entirely.
 
 Core implementation package for the `omp` coding agent in the `oh-my-pi` monorepo.
 

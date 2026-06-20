@@ -1,6 +1,11 @@
 # Changelog
 
-## [Unreleased]
+
+### Added
+
+- Added `compaction.timeoutMs` setting to configure compaction summarization timeout
+
+## [16.1.5]
 
 ## [16.1.7] - 2026-06-20
 

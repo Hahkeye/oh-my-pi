@@ -161,7 +161,7 @@ export type StatusLineSegmentId =
 	| "cache_write"
 	| "cache_hit"
 	| "session_name"
-	| "usage"
+	| "version"
 	| "collab";
 
 /** Submenu choice metadata. */
@@ -1729,6 +1729,24 @@ export const SETTINGS_SCHEMA = {
 			group: "Compaction",
 			label: "Remote Compaction",
 			description: "Use remote compaction endpoints when available instead of local summarization",
+		},
+	},
+	"compaction.timeoutMs": {
+		type: "number",
+		default: 600_000,
+		ui: {
+			tab: "context",
+			group: "Compaction",
+			label: "Compaction Timeout",
+			description:
+				"Maximum time in milliseconds to wait for compaction summarization; higher values help slower models complete compact calls without timing out on the first event.",
+			options: [
+				{ value: "300000", label: "5 minutes" },
+				{ value: "600000", label: "10 minutes" },
+				{ value: "900000", label: "15 minutes" },
+				{ value: "1200000", label: "20 minutes" },
+				{ value: "1800000", label: "30 minutes" },
+			],
 		},
 	},
 
@@ -4338,6 +4356,119 @@ export const SETTINGS_SCHEMA = {
 			],
 		},
 	},
+	"provider.openaiStreamFirstEventTimeoutMs": {
+		type: "number",
+		default: undefined,
+		ui: {
+			tab: "providers",
+			group: "Protocol",
+			label: "OpenAI First-Event Timeout",
+			description:
+				"Override the OpenAI-compatible stream first-event timeout in milliseconds. When set, it replaces the default/env fallback so slow local or remote models can process large prompts before timing out.",
+			options: [
+				{ value: "60000", label: "1 minute" },
+				{ value: "120000", label: "2 minutes" },
+				{ value: "180000", label: "3 minutes" },
+				{ value: "300000", label: "5 minutes" },
+				{ value: "600000", label: "10 minutes" },
+				{ value: "0", label: "Disabled" },
+			],
+		},
+	},
+
+	"provider.openaiStreamIdleTimeoutMs": {
+		type: "number",
+		default: undefined,
+		ui: {
+			tab: "providers",
+			group: "Protocol",
+			label: "OpenAI Idle Timeout",
+			description:
+				"Override the OpenAI-compatible stream idle timeout in milliseconds. Applies after the first event arrives and guards against silent mid-stream stalls.",
+			options: [
+				{ value: "120000", label: "2 minutes" },
+				{ value: "180000", label: "3 minutes" },
+				{ value: "300000", label: "5 minutes" },
+				{ value: "600000", label: "10 minutes" },
+				{ value: "0", label: "Disabled" },
+			],
+		},
+	},
+	"provider.llamacppStreamFirstEventTimeoutMs": {
+		type: "number",
+		default: undefined,
+		ui: {
+			tab: "providers",
+			group: "Protocol",
+			label: "llama.cpp First-Event Timeout",
+			description:
+				"Override the first-event timeout for llama.cpp / OpenAI-compatible local servers in milliseconds. Useful for slow local models during compaction or large prompts.",
+			options: [
+				{ value: "60000", label: "1 minute" },
+				{ value: "120000", label: "2 minutes" },
+				{ value: "300000", label: "5 minutes" },
+				{ value: "600000", label: "10 minutes" },
+				{ value: "0", label: "Disabled" },
+			],
+		},
+	},
+
+	"provider.llamacppStreamIdleTimeoutMs": {
+		type: "number",
+		default: undefined,
+		ui: {
+			tab: "providers",
+			group: "Protocol",
+			label: "llama.cpp Idle Timeout",
+			description:
+				"Override the idle timeout for llama.cpp / OpenAI-compatible local servers in milliseconds. Applies after the first event arrives and guards against silent mid-stream stalls.",
+			options: [
+				{ value: "120000", label: "2 minutes" },
+				{ value: "180000", label: "3 minutes" },
+				{ value: "300000", label: "5 minutes" },
+				{ value: "600000", label: "10 minutes" },
+				{ value: "0", label: "Disabled" },
+			],
+		},
+	},
+
+	// Global stream timeouts. Local/slow models can legitimately exceed the legacy
+	// 120s idle ceiling, so the defaults are wide to match the compaction budget.
+	"provider.streamIdleTimeoutMs": {
+		type: "number",
+		default: 600_000,
+		ui: {
+			tab: "providers",
+			group: "Protocol",
+			label: "Global Stream Idle Timeout",
+			description:
+				"Default idle timeout for all streaming providers in milliseconds. Use a larger value for slow local models. Set to 0 to disable idle watchdogs entirely.",
+			options: [
+				{ value: "120000", label: "2 minutes" },
+				{ value: "300000", label: "5 minutes" },
+				{ value: "600000", label: "10 minutes" },
+				{ value: "0", label: "Disabled" },
+			],
+		},
+	},
+
+	"provider.streamFirstEventTimeoutMs": {
+		type: "number",
+		default: 600_000,
+		ui: {
+			tab: "providers",
+			group: "Protocol",
+			label: "Global First-Event Timeout",
+			description:
+				"Default timeout while waiting for a streaming provider's first event in milliseconds. Use a larger value for models with large prompt prefills.",
+			options: [
+				{ value: "60000", label: "1 minute" },
+				{ value: "300000", label: "5 minutes" },
+				{ value: "600000", label: "10 minutes" },
+				{ value: "0", label: "Disabled" },
+			],
+		},
+	},
 
 	// Exa
 	"exa.enabled": {
@@ -4582,6 +4713,7 @@ export interface CompactionSettings {
 	idleTimeoutSeconds: number;
 	supersedeReads: boolean;
 	dropUseless: boolean;
+	timeoutMs: number;
 }
 
 export interface ContextPromotionSettings {

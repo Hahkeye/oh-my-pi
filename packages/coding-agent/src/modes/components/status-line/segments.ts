@@ -11,6 +11,15 @@ import { formatContextUsage, getContextUsageLevel, getContextUsageThemeColor } f
 import type { RenderedSegment, SegmentContext, StatusLineSegment, StatusLineSegmentId } from "./types";
 
 export type { SegmentContext } from "./types";
+const CLI_VERSION = "16.1.5";
+
+const versionSegment: StatusLineSegment = {
+label: "Version",
+group: "System",
+render() {
+return { content: `v${CLI_VERSION}`, visible: true };
+},
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
@@ -594,6 +603,7 @@ export const SEGMENTS: Record<StatusLineSegmentId, StatusLineSegment> = {
 	context_pct: contextPctSegment,
 	context_total: contextTotalSegment,
 	time_spent: timeSpentSegment,
+	version: versionSegment,
 	time: timeSegment,
 	session: sessionSegment,
 	hostname: hostnameSegment,

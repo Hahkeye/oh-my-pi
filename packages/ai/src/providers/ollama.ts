@@ -19,8 +19,8 @@ import { AssistantMessageEventStream } from "../utils/event-stream";
 import { type CapturedHttpErrorResponse, finalizeErrorMessage, type RawHttpRequestDump } from "../utils/http-inspector";
 import {
 	armPreResponseTimeout,
-	getOpenAIStreamFirstEventTimeoutMs,
-	getOpenAIStreamIdleTimeoutMs,
+	getLlamaCppStreamFirstEventTimeoutMs,
+	getLlamaCppStreamIdleTimeoutMs,
 } from "../utils/idle-iterator";
 import { parseStreamingJson } from "../utils/json-parse";
 import { toolWireSchema } from "../utils/schema/wire";
@@ -540,9 +540,9 @@ export const streamOllama: StreamFunction<"ollama-chat"> = (
 			// the iterator-level watchdog) need a pre-response timer alongside
 			// `timeout: false`; otherwise an Ollama server that accepts the
 			// POST and never streams headers would hang forever (issue #2422).
-			const idleTimeoutMs = options.streamIdleTimeoutMs ?? getOpenAIStreamIdleTimeoutMs();
+			const idleTimeoutMs = options.streamIdleTimeoutMs ?? getLlamaCppStreamIdleTimeoutMs();
 			const firstEventTimeoutMs =
-				options.streamFirstEventTimeoutMs ?? getOpenAIStreamFirstEventTimeoutMs(idleTimeoutMs);
+				options.streamFirstEventTimeoutMs ?? getLlamaCppStreamFirstEventTimeoutMs(idleTimeoutMs);
 			// Cleared the instant headers arrive (below) so the pre-response timer
 			// never aborts the actively streaming body — an absolute
 			// `AbortSignal.timeout` would (issue #2422).

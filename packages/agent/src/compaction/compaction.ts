@@ -10,6 +10,7 @@ import {
 	type AssistantMessage,
 	Effort,
 	type FetchImpl,
+	type SimpleStreamOptions,
 	type Message,
 	type MessageAttribution,
 	type Model,
@@ -579,6 +580,13 @@ function resolveCompactionEffort(model: Model, level: ThinkingLevel | undefined)
 		level === undefined || level === ThinkingLevel.Inherit ? Effort.High : effortFromThinkingLevel(level);
 	return clampThinkingLevelForModel(model, requested);
 }
+function buildCompactionSimpleStreamOptions(base: SimpleStreamOptions, options?: SummaryOptions): SimpleStreamOptions {
+	return {
+		...base,
+		streamFirstEventTimeoutMs: options?.streamFirstEventTimeoutMs ?? base.streamFirstEventTimeoutMs,
+		streamIdleTimeoutMs: options?.streamIdleTimeoutMs ?? base.streamIdleTimeoutMs,
+	};
+}
 
 /**
  * Build the error thrown when an LLM summarization call ends with
@@ -624,6 +632,10 @@ export interface SummaryOptions {
 	thinkingLevel?: ThinkingLevel;
 	/** Optional fetch implementation threaded into remote compaction calls. */
 	fetch?: FetchImpl;
+	/** Max time for the first SSE/event after send; 0 to disable. */
+	streamFirstEventTimeoutMs?: number;
+	/** Max idle time between streamed events; 0 to disable. */
+	streamIdleTimeoutMs?: number;
 }
 
 export async function generateSummary(
@@ -681,9 +693,7 @@ export async function generateSummary(
 		return remote.summary;
 	}
 
-	const response = await instrumentedCompleteSimple(
-		model,
-		{ systemPrompt: [SUMMARIZATION_SYSTEM_PROMPT], messages: summarizationMessages },
+	const compactionOptions = buildCompactionSimpleStreamOptions(
 		{
 			maxTokens,
 			signal,
@@ -692,6 +702,13 @@ export async function generateSummary(
 			initiatorOverride: options?.initiatorOverride,
 			metadata: options?.metadata,
 		},
+		options,
+	);
+
+	const response = await instrumentedCompleteSimple(
+		model,
+		{ systemPrompt: [SUMMARIZATION_SYSTEM_PROMPT], messages: summarizationMessages },
+		compactionOptions,
 		{ telemetry: options?.telemetry, oneshotKind: "compaction_summary" },
 	);
 
@@ -820,12 +837,7 @@ async function generateShortSummary(
 		return remote.summary;
 	}
 
-	const response = await instrumentedCompleteSimple(
-		model,
-		{
-			systemPrompt: [SUMMARIZATION_SYSTEM_PROMPT],
-			messages: [{ role: "user", content: [{ type: "text", text: promptText }], timestamp: Date.now() }],
-		},
+	const compactionOptions = buildCompactionSimpleStreamOptions(
 		{
 			maxTokens,
 			signal,
@@ -834,6 +846,16 @@ async function generateShortSummary(
 			initiatorOverride: options?.initiatorOverride,
 			metadata: options?.metadata,
 		},
+		options,
+	);
+
+	const response = await instrumentedCompleteSimple(
+		model,
+		{
+			systemPrompt: [SUMMARIZATION_SYSTEM_PROMPT],
+			messages: [{ role: "user", content: [{ type: "text", text: promptText }], timestamp: Date.now() }],
+		},
+		compactionOptions,
 		{ telemetry: options?.telemetry, oneshotKind: "compaction_short_summary" },
 	);
 
@@ -1173,9 +1195,7 @@ async function generateTurnPrefixSummary(
 		},
 	];
 
-	const response = await instrumentedCompleteSimple(
-		model,
-		{ systemPrompt: [SUMMARIZATION_SYSTEM_PROMPT], messages: summarizationMessages },
+	const compactionOptions = buildCompactionSimpleStreamOptions(
 		{
 			maxTokens,
 			signal,
@@ -1184,6 +1204,13 @@ async function generateTurnPrefixSummary(
 			initiatorOverride: options?.initiatorOverride,
 			metadata: options?.metadata,
 		},
+		options,
+	);
+
+	const response = await instrumentedCompleteSimple(
+		model,
+		{ systemPrompt: [SUMMARIZATION_SYSTEM_PROMPT], messages: summarizationMessages },
+		compactionOptions,
 		{ telemetry: options?.telemetry, oneshotKind: "compaction_turn_prefix" },
 	);
 

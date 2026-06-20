@@ -1,6 +1,11 @@
 # Changelog
 
-## [Unreleased]
+
+### Added
+
+- Added OpenAI-compatible provider stream timeout settings. `provider.openaiStreamFirstEventTimeoutMs` and `provider.openaiStreamIdleTimeoutMs` override the default env fallback so slow local or remote models can process large prompts before timing out.
+
+## [16.1.5]
 
 ## [16.1.4] - 2026-06-19
 
